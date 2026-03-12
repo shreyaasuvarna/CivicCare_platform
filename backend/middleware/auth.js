@@ -15,14 +15,28 @@ const protect = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
+    // const user = await User.findById(decoded.id);
 
-    if (!user) {
-      return res.status(401).json({ message: 'User no longer exists.' });
-    }
+    // if (!user) {
+    //   return res.status(401).json({ message: 'User no longer exists.' });
+    // }
 
-    req.user = user;
-    next();
+    // req.user = user;
+    if (decoded.role === "admin") {
+  req.user = { role: "admin", email: decoded.email };
+  return next();
+}
+
+const user = await User.findById(decoded.id);
+
+if (!user) {
+  return res.status(401).json({ message: 'User no longer exists.' });
+}
+
+req.user = user;
+next();
+
+  
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({ message: 'Invalid token. Please log in again.' });

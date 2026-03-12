@@ -2,8 +2,45 @@ const express = require('express');
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
 const { protect, adminOnly } = require('../middleware/auth');
-
+const jwt = require("jsonwebtoken");
 const router = express.Router();
+
+router.post("/login", async (req, res) => {
+
+  const { email, password } = req.body;
+
+  const ADMIN_EMAIL = "admin@mcc.gov.in";
+  const ADMIN_PASSWORD = "admin123";
+
+  if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    return res.status(401).json({
+      message: "Invalid admin credentials"
+    });
+  }
+
+  // const token = jwt.sign(
+  //   { role: "admin", email: ADMIN_EMAIL },
+  //   process.env.JWT_SECRET,
+  //   { expiresIn: "1d" }
+  // );
+  const token = jwt.sign(
+  { id: "admin123", role: "admin", email: ADMIN_EMAIL },
+  process.env.JWT_SECRET,
+  { expiresIn: "1d" }
+);
+
+
+  res.json({
+    token,
+    user: {
+  name: "Government Admin",
+  email: ADMIN_EMAIL,
+  role: "admin"
+}
+
+  });
+
+});
 
 // All admin routes require authentication + admin role
 router.use(protect, adminOnly);
@@ -128,6 +165,54 @@ router.get('/users', async (req, res) => {
     res.json({ users });
   } catch (error) {
     res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// @route   GET /api/admin/complaints
+// @desc    Get all complaints for government dashboard
+// @access  Admin
+// router.get('/complaints', async (req, res) => {
+//   try {
+//     const complaints = await Complaint.find()
+//       .populate('filedBy', 'name email')
+//       .sort({ createdAt: -1 });
+
+//     res.json(complaints);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// });
+
+
+// @route   PUT /api/admin/complaint/:id
+// @desc    Update complaint status and action
+// @access  Admin
+router.put('/complaint/:id', async (req, res) => {
+  try {
+    const { status, adminNote } = req.body;
+
+    const complaint = await Complaint.findById(req.params.id);
+
+    if (!complaint) {
+      return res.status(404).json({ message: "Complaint not found" });
+    }
+
+    complaint.status = status || complaint.status;
+    complaint.adminNote = adminNote || complaint.adminNote;
+
+    if (status === "Resolved") {
+      complaint.resolvedAt = new Date();
+    }
+
+    await complaint.save();
+
+    res.json({
+      message: "Complaint updated successfully",
+      complaint
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

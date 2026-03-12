@@ -29,7 +29,9 @@ API.interceptors.response.use(
 // Auth
 export const signup = (data) => API.post('/auth/signup', data);
 export const login = (data) => API.post('/auth/login', data);
-export const adminLogin = (data) => API.post('/auth/admin/login', data);
+// export const adminLogin = (data) => API.post('/auth/admin/login', data);
+// export const adminSignup = (data) => API.post('/auth/admin/signup', data);
+export const adminLogin = (data) => API.post('/admin/login', data);
 export const getMe = () => API.get('/auth/me');
 
 // Complaints

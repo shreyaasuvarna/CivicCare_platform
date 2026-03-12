@@ -35,7 +35,11 @@ export default function Navbar() {
               <Link to="/admin" style={{ ...styles.link, color: '#f59e0b' }}>Admin Panel</Link>
             )}
             <div style={styles.userMenu}>
-              <span style={styles.userName}>👤 {user.name.split(' ')[0]}</span>
+             <span style={styles.userName}>
+  👤 {user?.name ? user.name.split(' ')[0] : (user?.email ? user.email.split('@')[0] : "Admin")}
+</span>
+
+
               <button onClick={handleLogout} style={styles.logoutBtn}>Logout</button>
             </div>
           </>

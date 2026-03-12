@@ -4,207 +4,417 @@ import { getAdminStats, getAdminComplaints, updateComplaintStatus, deleteComplai
 import { useAuth } from '../context/AuthContext';
 
 const STATUS_OPTIONS = ['Pending', 'In Progress', 'Resolved', 'Rejected'];
+
 const STATUS_COLORS = {
-  'Pending': { bg: '#fef3c7', text: '#92400e' },
-  'In Progress': { bg: '#dbeafe', text: '#1e40af' },
-  'Resolved': { bg: '#dcfce7', text: '#166534' },
-  'Rejected': { bg: '#fee2e2', text: '#991b1b' },
+'Pending': { bg: '#fef3c7', text: '#92400e' },
+'In Progress': { bg: '#dbeafe', text: '#1e40af' },
+'Resolved': { bg: '#dcfce7', text: '#166534' },
+'Rejected': { bg: '#fee2e2', text: '#991b1b' },
 };
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [stats, setStats] = useState(null);
-  const [complaints, setComplaints] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ status: 'All', search: '' });
-  const [updating, setUpdating] = useState(null);
-  const [statusSelections, setStatusSelections] = useState({});
-  const [noteInputs, setNoteInputs] = useState({});
 
-  useEffect(() => {
-    loadData();
-  }, [filters]); // eslint-disable-line
+const { user, logout } = useAuth();
+const navigate = useNavigate();
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [statsRes, complaintsRes] = await Promise.all([
-        getAdminStats(),
-        getAdminComplaints({ status: filters.status, search: filters.search, limit: 50 })
-      ]);
-      setStats(statsRes.data.stats);
-      setComplaints(complaintsRes.data.complaints);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+const [stats, setStats] = useState(null);
+const [complaints, setComplaints] = useState([]);
+const [loading, setLoading] = useState(true);
 
-  const handleStatusUpdate = async (id) => {
-    const newStatus = statusSelections[id];
-    const adminNote = noteInputs[id] || '';
-    if (!newStatus) return alert('Please select a status.');
-    setUpdating(id);
-    try {
-      const { data } = await updateComplaintStatus(id, { status: newStatus, adminNote });
-      setComplaints(prev => prev.map(c => c._id === id ? data.complaint : c));
-      alert(`Status updated to "${newStatus}"`);
-    } catch (err) {
-      alert(err.response?.data?.message || 'Update failed.');
-    } finally {
-      setUpdating(null);
-    }
-  };
+const [filters, setFilters] = useState({
+status: 'All',
+search: ''
+});
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this complaint? This cannot be undone.')) return;
-    try {
-      await deleteComplaint(id);
-      setComplaints(prev => prev.filter(c => c._id !== id));
-    } catch (err) {
-      alert('Failed to delete.');
-    }
-  };
+const [updating, setUpdating] = useState(null);
+const [statusSelections, setStatusSelections] = useState({});
+const [noteInputs, setNoteInputs] = useState({});
 
-  const handleLogout = () => { logout(); navigate('/'); };
+useEffect(() => {
+loadData();
+}, [filters]);
 
-  return (
-    <div style={styles.page}>
-      {/* Sidebar */}
-      <aside style={styles.sidebar}>
-        <div style={styles.sidebarBrand}>
-          <span style={{ fontSize: '1.5rem' }}>🏛️</span>
-          <div>
-            <div style={styles.sidebarTitle}>Admin Panel</div>
-            <div style={styles.sidebarSub}>MCC Dashboard</div>
-          </div>
-        </div>
-        <div style={styles.sidebarUser}>
-          <div style={styles.avatar}>{user?.name?.[0]?.toUpperCase()}</div>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{user?.name}</div>
-            <div style={{ fontSize: '0.75rem', color: '#93c5fd' }}>{user?.email}</div>
-          </div>
-        </div>
-        <button onClick={handleLogout} style={styles.logoutBtn}>⬅ Logout</button>
-      </aside>
+const loadData = async () => {
+setLoading(true);
 
-      {/* Main */}
-      <main style={styles.main}>
-        <h1 style={styles.pageTitle}>Dashboard Overview</h1>
+try {
 
-        {/* Stats */}
-        {stats && (
-          <div style={styles.statsGrid}>
-            {[
-              { label: 'Total Complaints', value: stats.total, color: '#3b82f6' },
-              { label: 'Pending', value: stats.pending, color: '#f59e0b' },
-              { label: 'In Progress', value: stats.inProgress, color: '#6366f1' },
-              { label: 'Resolved', value: stats.resolved, color: '#10b981' },
-              { label: 'Registered Users', value: stats.totalUsers, color: '#8b5cf6' },
-              { label: 'New (7 days)', value: stats.recentComplaints, color: '#ec4899' },
-            ].map(s => (
-              <div key={s.label} style={{ ...styles.statCard, borderTop: `4px solid ${s.color}` }}>
-                <div style={{ ...styles.statValue, color: s.color }}>{s.value}</div>
-                <div style={styles.statLabel}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        )}
+  const [statsRes, complaintsRes] = await Promise.all([
+    getAdminStats(),
+    getAdminComplaints({
+      status: filters.status,
+      search: filters.search,
+      limit: 50
+    })
+  ]);
 
-        {/* Complaints Management */}
-        <div style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Manage Complaints</h2>
-            <div style={styles.filterRow}>
-              <input
-                placeholder="Search..."
-                value={filters.search}
-                onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
-                style={styles.searchInput}
-              />
-              <select
-                value={filters.status}
-                onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
-                style={styles.select}
-              >
-                <option value="All">All Statuses</option>
-                {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
-              </select>
-            </div>
-          </div>
+  setStats(statsRes.data.stats);
+  setComplaints(complaintsRes.data.complaints);
 
-          {loading ? (
-            <p style={{ color: '#6b7280', padding: '2rem' }}>Loading...</p>
-          ) : complaints.length === 0 ? (
-            <p style={{ color: '#6b7280', padding: '2rem' }}>No complaints found.</p>
-          ) : (
-            <div style={styles.tableWrap}>
-              <table style={styles.table}>
-                <thead>
-                  <tr style={styles.tableHead}>
-                    <th style={styles.th}>Title</th>
-                    <th style={styles.th}>Category</th>
-                    <th style={styles.th}>Location</th>
-                    <th style={styles.th}>Filed By</th>
-                    <th style={styles.th}>Votes</th>
-                    <th style={styles.th}>Status</th>
-                    <th style={styles.th}>Date</th>
-                    <th style={styles.th}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {complaints.map(c => {
-                    const sc = STATUS_COLORS[c.status] || STATUS_COLORS['Pending'];
-                    return (
-                      <tr key={c._id} style={styles.tableRow}>
-                        <td style={{ ...styles.td, fontWeight: 600, color: '#1e3a8a', maxWidth: '180px' }}>{c.title}</td>
-                        <td style={styles.td}><span style={styles.catBadge}>{c.category}</span></td>
-                        <td style={styles.td}>{c.location}</td>
-                        <td style={styles.td}>{c.userName}</td>
-                        <td style={{ ...styles.td, textAlign: 'center' }}>👍 {c.supportCount}</td>
-                        <td style={styles.td}>
-                          <span style={{ ...styles.statusBadge, background: sc.bg, color: sc.text }}>{c.status}</span>
-                        </td>
-                        <td style={styles.td}>{new Date(c.createdAt).toLocaleDateString()}</td>
-                        <td style={styles.td}>
-                          <div style={styles.actionGroup}>
-                            <select
-                              defaultValue={c.status}
-                              onChange={e => setStatusSelections(prev => ({ ...prev, [c._id]: e.target.value }))}
-                              style={styles.actionSelect}
-                            >
-                              {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
-                            </select>
-                            <input
-                              placeholder="Note (optional)"
-                              value={noteInputs[c._id] || ''}
-                              onChange={e => setNoteInputs(prev => ({ ...prev, [c._id]: e.target.value }))}
-                              style={styles.noteInput}
-                            />
-                            <button
-                              onClick={() => handleStatusUpdate(c._id)}
-                              disabled={updating === c._id}
-                              style={styles.updateBtn}
-                            >
-                              {updating === c._id ? '...' : 'Update'}
-                            </button>
-                            <button onClick={() => handleDelete(c._id)} style={styles.deleteBtn}>Delete</button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
+} catch (err) {
+  console.error(err);
+}
+
+finally {
+  setLoading(false);
+}
+
+};
+
+const handleStatusUpdate = async (id) => {
+
+const newStatus = statusSelections[id];
+const adminNote = noteInputs[id] || '';
+
+if (!newStatus) {
+  return alert('Please select a status.');
+}
+
+setUpdating(id);
+
+try {
+
+  const { data } = await updateComplaintStatus(id, {
+    status: newStatus,
+    adminNote
+  });
+
+  setComplaints(prev =>
+    prev.map(c => c._id === id ? data.complaint : c)
   );
+
+  alert(`Status updated to "${newStatus}"`);
+
+} catch (err) {
+  alert(err.response?.data?.message || 'Update failed.');
+}
+
+finally {
+  setUpdating(null);
+}
+
+};
+
+const handleDelete = async (id) => {
+
+if (!window.confirm('Delete this complaint? This cannot be undone.')) return;
+
+try {
+
+  await deleteComplaint(id);
+
+  setComplaints(prev =>
+    prev.filter(c => c._id !== id)
+  );
+
+} catch (err) {
+  alert('Failed to delete.');
+}
+
+};
+
+const handleLogout = () => {
+logout();
+navigate('/');
+};
+
+return (
+
+<div style={styles.page}>
+
+  {/* Sidebar */}
+
+  <aside style={styles.sidebar}>
+
+    <div style={styles.sidebarBrand}>
+      <span style={{ fontSize: '1.5rem' }}>🏛️</span>
+
+      <div>
+        <div style={styles.sidebarTitle}>Admin Panel</div>
+        <div style={styles.sidebarSub}>MCC Dashboard</div>
+      </div>
+    </div>
+
+    <div style={styles.sidebarUser}>
+
+      <div style={styles.avatar}>
+        {user?.name?.[0]?.toUpperCase()}
+      </div>
+
+      <div>
+        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
+          {user?.name}
+        </div>
+
+        <div style={{ fontSize: '0.75rem', color: '#93c5fd' }}>
+          {user?.email}
+        </div>
+      </div>
+
+    </div>
+
+    <button
+      onClick={handleLogout}
+      style={styles.logoutBtn}
+    >
+      ⬅ Logout
+    </button>
+
+  </aside>
+
+  {/* Main */}
+
+  <main style={styles.main}>
+
+    <h1 style={styles.pageTitle}>
+      Dashboard Overview
+    </h1>
+
+    {/* Stats */}
+
+    {stats && (
+
+      <div style={styles.statsGrid}>
+
+        {[
+          { label: 'Total Complaints', value: stats.total, color: '#3b82f6' },
+          { label: 'Pending', value: stats.pending, color: '#f59e0b' },
+          { label: 'In Progress', value: stats.inProgress, color: '#6366f1' },
+          { label: 'Resolved', value: stats.resolved, color: '#10b981' },
+          { label: 'Registered Users', value: stats.totalUsers, color: '#8b5cf6' },
+          { label: 'New (7 days)', value: stats.recentComplaints, color: '#ec4899' },
+        ].map(s => (
+
+          <div
+            key={s.label}
+            style={{
+              ...styles.statCard,
+              borderTop: `4px solid ${s.color}`
+            }}
+          >
+
+            <div
+              style={{
+                ...styles.statValue,
+                color: s.color
+              }}
+            >
+              {s.value}
+            </div>
+
+            <div style={styles.statLabel}>
+              {s.label}
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+    {/* Complaints Table */}
+
+    <div style={styles.section}>
+
+      <div style={styles.sectionHeader}>
+
+        <h2 style={styles.sectionTitle}>
+          Manage Complaints
+        </h2>
+
+        <div style={styles.filterRow}>
+
+          <input
+            placeholder="Search..."
+            value={filters.search}
+            onChange={e =>
+              setFilters(f => ({
+                ...f,
+                search: e.target.value
+              }))
+            }
+            style={styles.searchInput}
+          />
+
+          <select
+            value={filters.status}
+            onChange={e =>
+              setFilters(f => ({
+                ...f,
+                status: e.target.value
+              }))
+            }
+            style={styles.select}
+          >
+
+            <option value="All">
+              All Statuses
+            </option>
+
+            {STATUS_OPTIONS.map(s =>
+              <option key={s}>{s}</option>
+            )}
+
+          </select>
+
+        </div>
+
+      </div>
+
+      {loading ? (
+
+        <p style={{ padding: '2rem' }}>
+          Loading...
+        </p>
+
+      ) : (
+
+        <div style={styles.tableWrap}>
+
+          <table style={styles.table}>
+
+            <thead>
+
+              <tr style={styles.tableHead}>
+                <th style={styles.th}>Title</th>
+                <th style={styles.th}>Category</th>
+                <th style={styles.th}>Location</th>
+                <th style={styles.th}>Filed By</th>
+                <th style={styles.th}>Votes</th>
+                <th style={styles.th}>Status</th>
+                <th style={styles.th}>Government Action</th>
+                <th style={styles.th}>Date</th>
+                <th style={styles.th}>Actions</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {complaints.map(c => {
+
+                const sc = STATUS_COLORS[c.status] || STATUS_COLORS['Pending'];
+
+                return (
+
+                  <tr key={c._id} style={styles.tableRow}>
+
+                    <td style={{ ...styles.td, fontWeight: 600 }}>
+                      {c.title}
+                    </td>
+
+                    <td style={styles.td}>
+                      <span style={styles.catBadge}>
+                        {c.category}
+                      </span>
+                    </td>
+
+                    <td style={styles.td}>
+                      {c.location}
+                    </td>
+
+                    <td style={styles.td}>
+                      {c.userName}
+                    </td>
+
+                    <td style={{ ...styles.td, textAlign: 'center' }}>
+                      👍 {c.supportCount}
+                    </td>
+
+                    <td style={styles.td}>
+                      <span
+                        style={{
+                          ...styles.statusBadge,
+                          background: sc.bg,
+                          color: sc.text
+                        }}
+                      >
+                        {c.status}
+                      </span>
+                    </td>
+
+                    <td style={{ ...styles.td, maxWidth: '220px', whiteSpace: 'normal' }}>
+                      {c.adminNote || '—'}
+                    </td>
+
+                    <td style={styles.td}>
+                      {new Date(c.createdAt).toLocaleDateString()}
+                    </td>
+
+                    <td style={styles.td}>
+
+                      <div style={styles.actionGroup}>
+
+                        <select
+                          defaultValue={c.status}
+                          onChange={e =>
+                            setStatusSelections(prev => ({
+                              ...prev,
+                              [c._id]: e.target.value
+                            }))
+                          }
+                          style={styles.actionSelect}
+                        >
+                          {STATUS_OPTIONS.map(s =>
+                            <option key={s}>{s}</option>
+                          )}
+                        </select>
+
+                        <input
+                          placeholder="Note (optional)"
+                          value={noteInputs[c._id] || ''}
+                          onChange={e =>
+                            setNoteInputs(prev => ({
+                              ...prev,
+                              [c._id]: e.target.value
+                            }))
+                          }
+                          style={styles.noteInput}
+                        />
+
+                        <button
+                          onClick={() => handleStatusUpdate(c._id)}
+                          disabled={updating === c._id}
+                          style={styles.updateBtn}
+                        >
+                          {updating === c._id ? '...' : 'Update'}
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(c._id)}
+                          style={styles.deleteBtn}
+                        >
+                          Delete
+                        </button>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                );
+
+              })}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      )}
+
+    </div>
+
+  </main>
+
+</div>
+
+);
+
 }
 
 const styles = {

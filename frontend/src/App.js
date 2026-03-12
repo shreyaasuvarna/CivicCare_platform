@@ -11,6 +11,7 @@ import ViewComplaints from './pages/ViewComplaints';
 import FileComplaint from './pages/FileComplaint';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import GovernmentDashboard from "./pages/GovernmentDashboard";
 
 function Layout({ children, showNav = true }) {
   return (
@@ -47,6 +48,7 @@ export default function App() {
             </ProtectedRoute>
           } />
 
+         <Route path="/government" element={<GovernmentDashboard />} />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
