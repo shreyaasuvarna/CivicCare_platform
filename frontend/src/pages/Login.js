@@ -36,7 +36,7 @@ export default function Login() {
         <div style={styles.header}>
           <div style={styles.icon}>🗳️</div>
           <h1 style={styles.title}>Welcome back</h1>
-          <p style={styles.subtitle}>Sign in to your MyVoice account</p>
+          <p style={styles.subtitle}>Sign in to your CivicCare account</p>
         </div>
 
         {error && <div style={styles.errorBox}>{error}</div>}

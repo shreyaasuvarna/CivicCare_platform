@@ -75,7 +75,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer style={styles.footer}>
-        <p>© 2025 MyVoice · Mangalore Civic Issue Tracker</p>
+        <p>© 2025 CivicCare · Mangalore Civic Issue Tracker</p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '0.5rem' }}>
           <Link to="/complaints" style={styles.footerLink}>Complaints</Link>
           <Link to="/admin/login" style={styles.footerLink}>Authority Login</Link>

@@ -37,7 +37,7 @@ export default function Signup() {
         <div style={styles.header}>
           <div style={styles.icon}>🗳️</div>
           <h1 style={styles.title}>Create Account</h1>
-          <p style={styles.subtitle}>Join MyVoice and make Mangalore better</p>
+          <p style={styles.subtitle}>Join CivicCare and make Mangalore better</p>
         </div>
 
         {error && <div style={styles.errorBox}>{error}</div>}

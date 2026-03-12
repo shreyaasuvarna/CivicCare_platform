@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 
 dotenv.config();
-
+// require("dotenv").config();
 const authRoutes = require('./routes/auth');
 const complaintRoutes = require('./routes/complaints');
 const adminRoutes = require('./routes/admin');
