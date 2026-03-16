@@ -17,7 +17,7 @@ export default function AdminLogin() {
     try {
       const { data } = await adminLogin(form);
       saveAuth(data.token, data.user);
-      navigate('/government', { replace: true });
+      navigate('/admin', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid admin credentials.');
     } finally {
