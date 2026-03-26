@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAdminStats, getAdminComplaints, updateComplaintStatus, deleteComplaint } from '../api';
+import { getAdminStats, getAdminComplaints, updateComplaintStatus } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const STATUS_OPTIONS = ['Pending', 'In Progress', 'Resolved', 'Rejected'];
@@ -95,23 +95,23 @@ finally {
 
 };
 
-const handleDelete = async (id) => {
+// const handleDelete = async (id) => {
 
-if (!window.confirm('Delete this complaint? This cannot be undone.')) return;
+// if (!window.confirm('Delete this complaint? This cannot be undone.')) return;
 
-try {
+// try {
 
-  await deleteComplaint(id);
+//   await deleteComplaint(id);
 
-  setComplaints(prev =>
-    prev.filter(c => c._id !== id)
-  );
+//   setComplaints(prev =>
+//     prev.filter(c => c._id !== id)
+//   );
 
-} catch (err) {
-  alert('Failed to delete.');
-}
+// } catch (err) {
+//   alert('Failed to delete.');
+// }
 
-};
+// };
 
 const handleLogout = () => {
 logout();
@@ -382,12 +382,12 @@ return (
                           {updating === c._id ? '...' : 'Update'}
                         </button>
 
-                        <button
+                        {/* <button
                           onClick={() => handleDelete(c._id)}
                           style={styles.deleteBtn}
                         >
                           Delete
-                        </button>
+                        </button> */}
 
                       </div>
 
@@ -469,9 +469,9 @@ const styles = {
     padding: '0.35rem 0.75rem', borderRadius: '6px', cursor: 'pointer',
     fontWeight: 600, fontSize: '0.8rem'
   },
-  deleteBtn: {
-    background: '#fee2e2', color: '#dc2626', border: 'none',
-    padding: '0.35rem 0.75rem', borderRadius: '6px', cursor: 'pointer',
-    fontWeight: 600, fontSize: '0.8rem'
-  }
+  // deleteBtn: {
+  //   background: '#fee2e2', color: '#dc2626', border: 'none',
+  //   padding: '0.35rem 0.75rem', borderRadius: '6px', cursor: 'pointer',
+  //   fontWeight: 600, fontSize: '0.8rem'
+  // }
 };

@@ -40,6 +40,10 @@ export const getComplaint = (id) => API.get(`/complaints/${id}`);
 export const fileComplaint = (data) => API.post('/complaints', data, {
   headers: { 'Content-Type': 'multipart/form-data' }
 });
+// export const deleteComplaint = (id) => {
+//   return axios.delete(`/api/complaints/${id}`);
+// };
+
 export const supportComplaint = (id) => API.post(`/complaints/${id}/support`);
 export const getMyComplaints = () => API.get('/complaints/user/my');
 
@@ -47,7 +51,7 @@ export const getMyComplaints = () => API.get('/complaints/user/my');
 export const getAdminStats = () => API.get('/admin/stats');
 export const getAdminComplaints = (params) => API.get('/admin/complaints', { params });
 export const updateComplaintStatus = (id, data) => API.patch(`/admin/complaints/${id}/status`, data);
-export const deleteComplaint = (id) => API.delete(`/admin/complaints/${id}`);
+// export const deleteComplaint = (id) => API.delete(`/admin/complaints/${id}`);
 export const getUsers = () => API.get('/admin/users');
 
 export default API;

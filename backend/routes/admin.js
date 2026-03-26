@@ -96,11 +96,63 @@ router.get('/complaints', async (req, res) => {
     }
 
     const total = await Complaint.countDocuments(query);
-    const complaints = await Complaint.find(query)
-      .sort(sort)
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit))
-      .populate('filedBy', 'name email');
+    // const complaints = await Complaint.find(query)
+    //   .sort(sort)
+    //   .skip((page - 1) * limit)
+    //   .limit(parseInt(limit))
+    //   .populate('filedBy', 'name email');
+  //   const complaints = await Complaint.find(query)
+  // .sort({ priorityScore: -1, createdAt: -1 }) // 🔥 AI PRIORITY SORT
+  // .skip((page - 1) * limit)
+  // .limit(parseInt(limit))
+  // .populate('filedBy', 'name email');
+  const complaints = await Complaint.aggregate([
+  { $match: query },
+
+  // 🔥 Assign priority based on status
+  {
+    $addFields: {
+      statusPriority: {
+        $switch: {
+          branches: [
+            { case: { $eq: ["$status", "Pending"] }, then: 1 },
+            { case: { $eq: ["$status", "In Progress"] }, then: 2 },
+            { case: { $eq: ["$status", "Resolved"] }, then: 3 },
+            { case: { $eq: ["$status", "Rejected"] }, then: 4 }
+          ],
+          default: 5
+        }
+      }
+    }
+  },
+
+  // 🔥 Sort logic
+  {
+    // $sort: {
+    //   statusPriority: 1,     // Pending first
+    //   priorityScore: -1,     // Then AI priority
+    //   createdAt: -1          // Then newest
+    // }
+    $sort: {
+  isCritical: -1,        // 🚨 FORCE CRITICAL FIRST
+  statusPriority: 1,     // then Pending > others
+  priorityScore: -1,     // then AI score
+  createdAt: -1
+}
+
+  },
+
+  { $skip: (page - 1) * limit },
+  { $limit: parseInt(limit) }
+]);
+
+// ✅ Populate user details (important)
+await Complaint.populate(complaints, {
+  path: 'filedBy',
+  select: 'name email'
+});
+
+
 
     res.json({ complaints, total, pages: Math.ceil(total / limit), currentPage: parseInt(page) });
   } catch (error) {

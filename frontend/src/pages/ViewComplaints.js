@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getComplaints, supportComplaint } from '../api';
+import { getComplaints, supportComplaint} from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const CATEGORIES = ['All', 'Road & Infrastructure', 'Garbage & Sanitation', 'Water Supply', 'Street Lights', 'Public Safety', 'Other'];
@@ -42,17 +42,86 @@ export default function ViewComplaints() {
 
   useEffect(() => { fetchComplaints(1); }, [fetchComplaints]);
 
-  const handleSupport = async (id) => {
-    if (!user) { navigate('/login'); return; }
-    try {
-      const { data } = await supportComplaint(id);
-      setComplaints(prev => prev.map(c =>
-        c._id === id ? { ...c, supportCount: data.supportCount, supported: data.supported } : c
-      ));
-    } catch (err) {
-      alert(err.response?.data?.message || 'Error supporting complaint.');
-    }
-  };
+  // const handleSupport = async (id) => {
+  //   if (!user) { navigate('/login'); return; }
+  //   try {
+  //     const { data } = await supportComplaint(id);
+  //     setComplaints(prev => prev.map(c =>
+  //       c._id === id ? { ...c, supportCount: data.supportCount, supported: data.supported } : c
+  //     ));
+  //   } catch (err) {
+  //     alert(err.response?.data?.message || 'Error supporting complaint.');
+  //   }
+  // };
+        const handleSupport = async (id) => {
+        if (!user) {
+          navigate('/login');
+          return;
+        }
+
+        // ✅ Optimistic update (instant UI change)
+        setComplaints(prev =>
+          prev.map(c =>
+            c._id === id
+              ? {
+                  ...c,
+                  supportCount: (c.supportCount || 0) + (c.supported ? -1 : 1),
+                  supported: !c.supported
+                }
+              : c
+          )
+        );
+
+        try {
+          const { data } = await supportComplaint(id);
+
+          // ✅ Sync with backend (optional correction)
+          setComplaints(prev =>
+            prev.map(c =>
+              c._id === id
+                ? {
+                    ...c,
+                    supportCount: data.supportCount,
+                    supported: data.supported
+                  }
+                : c
+            )
+          );
+        } catch (err) {
+          // ❌ Revert if API fails
+          setComplaints(prev =>
+            prev.map(c =>
+              c._id === id
+                ? {
+                    ...c,
+                    supportCount: (c.supportCount || 0) + (c.supported ? 1 : -1),
+                    supported: !c.supported
+                  }
+                : c
+            )
+          );
+
+          alert(err.response?.data?.message || 'Error supporting complaint.');
+        }
+      };
+      const handleDelete = async (id) => {
+      
+      if (!window.confirm('Delete this complaint? This cannot be undone.')) return;
+      
+      try {
+      
+        await deleteComplaint(id);
+      
+        setComplaints(prev =>
+          prev.filter(c => c._id !== id)
+        );
+      
+      } catch (err) {
+        alert('Failed to delete.');
+      }
+      
+      };
+
 
   const handleFilterChange = (key, val) => setFilters(prev => ({ ...prev, [key]: val }));
 
@@ -125,12 +194,29 @@ export default function ViewComplaints() {
                       <span style={styles.cardInfo}>👤 {c.userName}</span>
                       <span style={styles.cardInfo}>🗓️ {new Date(c.createdAt).toLocaleDateString()}</span>
                     </div>
-                    <button
+                    {/* <button
                       onClick={() => handleSupport(c._id)}
                       style={styles.supportBtn}
                     >
                       👍 Support ({c.supportCount || 0})
+                    </button> */}
+
+                    <button
+                      onClick={() => handleSupport(c._id)}
+                      style={{
+                        ...styles.supportBtn,
+                        background: c.supported ? '#16a34a' : '#2563eb'
+                      }}
+                    >
+                      {c.supported ? '✅ Supported' : '👍 Support'} ({c.supportCount || 0})
                     </button>
+                    {/* <button
+                          onClick={() => handleDelete(c._id)}
+                          style={styles.deleteBtn}
+                        >
+                          Delete
+                        </button> */}
+
                   </div>
                 </div>
               );
@@ -209,11 +295,17 @@ const styles = {
     padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer',
     fontWeight: 600, fontSize: '0.85rem', width: '100%'
   },
+  //   deleteBtn: {
+  //   background: '#fee2e2', color: '#dc2626', border: 'none',
+  //   padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer',
+  //   fontWeight: 600, fontSize: '0.85rem', width: '100%'
+  // },
   pagination: { display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '2rem' },
   pageBtn: {
     width: '36px', height: '36px', border: '1px solid #d1d5db',
     borderRadius: '8px', cursor: 'pointer', background: '#fff',
     fontWeight: 600, fontSize: '0.9rem'
   },
+ 
   pageBtnActive: { background: '#2563eb', color: '#fff', border: '1px solid #2563eb' }
 };

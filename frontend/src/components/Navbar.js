@@ -19,7 +19,7 @@ export default function Navbar() {
     <nav style={styles.nav}>
       <Link to="/" style={styles.brand}>
         <span style={styles.brandIcon}>🗳️</span>
-        <span style={styles.brandText}>MyVoice</span>
+        <span style={styles.brandText}>CivicCare</span>
         <span style={styles.brandSub}>Mangalore</span>
       </Link>
 

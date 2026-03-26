@@ -61,7 +61,17 @@ const complaintSchema = new mongoose.Schema({
   resolvedAt: {
     type: Date,
     default: null
-  }
+  },
+  priorityScore: {
+    type: Number,
+    default: 0
+},
+isCritical: {
+  type: Boolean,
+  default: false
+}
+
+
 }, { timestamps: true });
 
 // Index for searching
