@@ -18,11 +18,7 @@ router.post("/login", async (req, res) => {
     });
   }
 
-  // const token = jwt.sign(
-  //   { role: "admin", email: ADMIN_EMAIL },
-  //   process.env.JWT_SECRET,
-  //   { expiresIn: "1d" }
-  // );
+  
   const token = jwt.sign(
   { id: "admin123", role: "admin", email: ADMIN_EMAIL },
   process.env.JWT_SECRET,
@@ -96,16 +92,7 @@ router.get('/complaints', async (req, res) => {
     }
 
     const total = await Complaint.countDocuments(query);
-    // const complaints = await Complaint.find(query)
-    //   .sort(sort)
-    //   .skip((page - 1) * limit)
-    //   .limit(parseInt(limit))
-    //   .populate('filedBy', 'name email');
-  //   const complaints = await Complaint.find(query)
-  // .sort({ priorityScore: -1, createdAt: -1 }) // 🔥 AI PRIORITY SORT
-  // .skip((page - 1) * limit)
-  // .limit(parseInt(limit))
-  // .populate('filedBy', 'name email');
+   
   const complaints = await Complaint.aggregate([
   { $match: query },
 
@@ -126,15 +113,11 @@ router.get('/complaints', async (req, res) => {
     }
   },
 
-  // 🔥 Sort logic
+  // Sort logic
   {
-    // $sort: {
-    //   statusPriority: 1,     // Pending first
-    //   priorityScore: -1,     // Then AI priority
-    //   createdAt: -1          // Then newest
-    // }
+    
     $sort: {
-  isCritical: -1,        // 🚨 FORCE CRITICAL FIRST
+  isCritical: -1,        // FORCE CRITICAL FIRST
   statusPriority: 1,     // then Pending > others
   priorityScore: -1,     // then AI score
   createdAt: -1
@@ -146,7 +129,7 @@ router.get('/complaints', async (req, res) => {
   { $limit: parseInt(limit) }
 ]);
 
-// ✅ Populate user details (important)
+//  Populate user details 
 await Complaint.populate(complaints, {
   path: 'filedBy',
   select: 'name email'

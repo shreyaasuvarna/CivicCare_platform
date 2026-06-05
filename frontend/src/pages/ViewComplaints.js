@@ -42,17 +42,7 @@ export default function ViewComplaints() {
 
   useEffect(() => { fetchComplaints(1); }, [fetchComplaints]);
 
-  // const handleSupport = async (id) => {
-  //   if (!user) { navigate('/login'); return; }
-  //   try {
-  //     const { data } = await supportComplaint(id);
-  //     setComplaints(prev => prev.map(c =>
-  //       c._id === id ? { ...c, supportCount: data.supportCount, supported: data.supported } : c
-  //     ));
-  //   } catch (err) {
-  //     alert(err.response?.data?.message || 'Error supporting complaint.');
-  //   }
-  // };
+
         const handleSupport = async (id) => {
         if (!user) {
           navigate('/login');

@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const User = require("./models/User");
+require('dotenv').config();
 
-const MONGO_URI = "mongodb+srv://23c66shreya_db_user:shreyaaashreyass@cluster0.dchbcxw.mongodb.net/?appName=Cluster0";
 
 async function createAdmin() {
 
   try {
 
-    await mongoose.connect(MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI);
 
     console.log("MongoDB Atlas Connected");
 

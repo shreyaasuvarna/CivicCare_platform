@@ -20,7 +20,7 @@ async function fixPriorities() {
       await c.save();
     }
 
-    console.log("✅ All priorities updated");
+    console.log("All priorities updated");
     process.exit();
 
   } catch (err) {

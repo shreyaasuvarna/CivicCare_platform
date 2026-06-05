@@ -60,51 +60,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// @route   POST /api/complaints
-// @desc    File a new complaint
-// @access  Private
-// router.post('/', protect, upload.single('image'), async (req, res) => {
-//   try {
-//     const { title, description, location, category } = req.body;
 
-//     if (!title || !description || !location || !category) {
-//       return res.status(400).json({ message: 'All fields are required.' });
-//     }
-
-//     const complaint = await Complaint.create({
-//       title,
-//       description,
-//       location,
-//       category,
-//       filedBy: req.user._id,
-//       userName: req.user.name,
-//       image: req.file ? `/uploads/${req.file.filename}` : null,
-//       createdAt: new Date(),
-//   supportCount: 0
-//     });
-
-//     // 🔥 CALCULATE AI PRIORITY
-// complaintData.priorityScore = calculatePriority(complaintData);
-
-// // Now save
-// const complaint = await Complaint.create(complaintData);
-
-//     // Increment user complaint count
-//     await User.findByIdAndUpdate(req.user._id, { $inc: { complaintsCount: 1 } });
-
-//     res.status(201).json({
-//       message: 'Complaint filed successfully!',
-//       complaint
-//     });
-//   } catch (error) {
-//     if (error.name === 'ValidationError') {
-//       const messages = Object.values(error.errors).map(e => e.message);
-//       return res.status(400).json({ message: messages.join(', ') });
-//     }
-//     console.error('File complaint error:', error);
-//     res.status(500).json({ message: 'Server error.' });
-//   }
-// });
 router.post('/', protect, upload.single('image'), async (req, res) => {
   try {
     const { title, description, location, category } = req.body;
@@ -113,7 +69,7 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
       return res.status(400).json({ message: 'All fields are required.' });
     }
 
-    // ✅ Step 1: Create object (NOT saving yet)
+    // Create object
     const complaintData = {
       title,
       description,
@@ -126,14 +82,14 @@ router.post('/', protect, upload.single('image'), async (req, res) => {
       supportCount: 0
     };
 
-    // ✅ Step 2: Calculate AI priority
+    //  Calculate AI priority
     // complaintData.priorityScore = calculatePriority(complaintData);
 const result = calculatePriority(complaintData);
 
 complaintData.priorityScore = result.score;
 complaintData.isCritical = result.isCritical;
 
-    // ✅ Step 3: Save to DB
+    //  Save to DB
     const complaint = await Complaint.create(complaintData);
 
     // Increment user complaint count
