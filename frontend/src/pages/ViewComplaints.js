@@ -49,7 +49,7 @@ export default function ViewComplaints() {
           return;
         }
 
-        // ✅ Optimistic update (instant UI change)
+       
         setComplaints(prev =>
           prev.map(c =>
             c._id === id
@@ -65,7 +65,7 @@ export default function ViewComplaints() {
         try {
           const { data } = await supportComplaint(id);
 
-          // ✅ Sync with backend (optional correction)
+          // Sync with backend 
           setComplaints(prev =>
             prev.map(c =>
               c._id === id
@@ -78,7 +78,7 @@ export default function ViewComplaints() {
             )
           );
         } catch (err) {
-          // ❌ Revert if API fails
+          // Revert if API fails
           setComplaints(prev =>
             prev.map(c =>
               c._id === id
@@ -188,7 +188,7 @@ export default function ViewComplaints() {
                       onClick={() => handleSupport(c._id)}
                       style={styles.supportBtn}
                     >
-                      👍 Support ({c.supportCount || 0})
+                       Support ({c.supportCount || 0})
                     </button> */}
 
                     <button
