@@ -5,7 +5,7 @@ A full-stack civic complaint management platform that lets citizens report local
 Frontend    : React 18, React Router v6, Axios\
 Backend     : Node.js, Express.js\
 Database    : MongoDB Atlas + Mongoose\
-Auth        : JWT (JSON Web Tokens), bcryptjs
+Auth        : JWT (JSON Web Tokens), bcryptjs\
 File Upload : Multer
 
 
@@ -16,7 +16,7 @@ Register and log in securely with JWT authentication\
 File complaints with title, description, location, category, and image upload\
 View all public complaints with search, filter, and pagination\
 Upvote/support complaints filed by others\
-Track the status of your own complaints\
+Track the status of your own complaints
 
 #### For Government Admins:
 Secure admin login with a dedicated dashboard\
@@ -25,7 +25,7 @@ Update complaint status (Pending → In Progress → Resolved / Rejected)\
 Add admin notes to complaints\
 View platform statistics: total complaints, resolved, pending, active users\
 Category-wise breakdown and recent activity metrics\
-Government dashboard for a public-facing overview\
+Government dashboard for a public-facing overview
 
 #### Smart Priority Engine
 Keyword-based critical detection (fire, gas leak, flood, collapse, etc.)\
